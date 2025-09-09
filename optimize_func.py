@@ -24,7 +24,7 @@ def run_optimization(d):
         method='BFGS',
         options={'disp': True}
     )
-
+    
     return result
 
 # Function to Print the Optimized Parameters

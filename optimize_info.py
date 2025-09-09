@@ -1,7 +1,7 @@
 """
 Filename: optimize_info.py
 Author: Alexay Mehra
-Date: 2025-09-08
+Date: 2025-09-09
 Description: Builds the gate sequence, defines the cost function, creates instance of the time evolution to match
 """
 

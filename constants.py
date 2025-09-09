@@ -1,7 +1,14 @@
+"""
+Filename: constants.py
+Author: Alexay Mehra
+Date: 2025-09-08
+Description: Holds constants to be used in operators.
+"""
+
+# Imports
 import numpy as np
 
-# Time to optimize over
-time = 1
+time = 1 # Time to optimize over
 
 # Parameters for Morse Potential
 mass = 1
@@ -13,7 +20,7 @@ equib_length = 0
 omega = 1.0  # Oscillator frequency
 chi = 0.01   # Qubit-oscillator coupling
 
-# Other Parameters
+# Parameters for units
 hbar = 1 
 
 # Trruncate the Fock Space Based on the number of states supported by the Morse Potential

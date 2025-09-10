@@ -1,7 +1,7 @@
 """
 Filename: constants.py
 Author: Alexay Mehra
-Date: 2025-09-08
+Date: 2025-09-10
 Description: Holds constants to be used in operators.
 """
 

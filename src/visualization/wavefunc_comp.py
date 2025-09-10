@@ -1,7 +1,7 @@
 """
 Filename: optimize_func.py
 Author: Alexay Mehra
-Date: 2025-09-08
+Date: 2025-09-10
 Description: Contains functions to compare generated vs target wavefunction evolution
 """
 
@@ -10,8 +10,8 @@ import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
 
-from constants import mass, hbar, omega, time, N
-from optimize_info import morse_to_optimize
+from utils.constants import mass, hbar, omega, time, N
+from optimization.optimize_info import morse_to_optimize
 
 
 # Function to Extract the Qumode Information from the Joint Qubit-Qumode State

@@ -1,7 +1,7 @@
 """
 Filename: myops.py
 Author: Alexay Mehra
-Date: 2025-09-08
+Date: 2025-09-10
 Description: Builds operators that will be used in the simulation:
 - Morse Hamiltonian and time evolution
 - Always-on Hamiltonain
@@ -13,9 +13,8 @@ Description: Builds operators that will be used in the simulation:
 # Imports
 import numpy as np
 import scipy as sp
-import matplotlib.pyplot as plt
 
-from constants import time, mass, diss_energy, width_param, equib_length, omega, chi, hbar, morse_cap, N
+from utils.constants import omega, chi, hbar, N
 
 
 I_q = np.eye(2) #Identity operator for qubits

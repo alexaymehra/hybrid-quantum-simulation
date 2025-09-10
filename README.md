@@ -18,7 +18,7 @@ MorsePotential/
 │
 ├── notebooks/        # Jupyter notebooks for experiments
 |
-├── docs/             # Additional documens
+├── docs/             # Additional documents
 |
 ├── README.md
 ├── requirements.txt

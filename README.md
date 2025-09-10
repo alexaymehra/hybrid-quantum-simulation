@@ -17,9 +17,6 @@ MorsePotential/
 │   └── utils/        # Helper functions
 │
 ├── notebooks/        # Jupyter notebooks for experiments
-├── tests/            # Unit tests
-├── data/             # Sample datasets (if not too large)
-├── docs/             # Extended documentation
-├── LICENSE
+|
 ├── README.md
 └── requirements.txt

@@ -1,7 +1,7 @@
 """
 Filename: optimize_func.py
 Author: Alexay Mehra
-Date: 2025-09-09
+Date: 2025-09-10
 Description: Contains the optimization function and function to print optimal parameters
 """
 
@@ -9,8 +9,7 @@ Description: Contains the optimization function and function to print optimal pa
 import numpy as np
 import scipy as sp
 
-from src.optimization.optimize_info import fidelity_loss, morse_to_optimize
-
+from .optimize_info import fidelity_loss, morse_to_optimize
 
 # Optimization Function
 def run_optimization(d):

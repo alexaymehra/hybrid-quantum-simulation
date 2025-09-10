@@ -1,7 +1,7 @@
 """
 Filename: plotpot.py
 Author: Alexay Mehra
-Date: 2025-09-08
+Date: 2025-09-10
 Description: Contains function which generates the graph of the morse potential based on the given parameters
 """
 
@@ -9,7 +9,7 @@ Description: Contains function which generates the graph of the morse potential 
 import numpy as np
 import matplotlib.pyplot as plt
 
-from src.utils.constants import diss_energy, width_param, equib_length
+from utils.constants import diss_energy, width_param, equib_length
 
 
 def plot_potential():

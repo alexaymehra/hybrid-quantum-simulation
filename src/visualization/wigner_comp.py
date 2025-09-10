@@ -1,7 +1,7 @@
 """
 Filename: optimize_func.py
 Author: Alexay Mehra
-Date: 2025-09-08
+Date: 2025-09-10
 Description: Contains functions to compare generated vs target wigner function evolution
 """
 
@@ -11,9 +11,9 @@ import scipy as sp
 import matplotlib.pyplot as plt
 from qutip import Qobj, wigner
 
-from src.visualization.wavefunc_comp import extract_qumode_info
-from src.utils.constants import time, N
-from src.optimization.optimize_info import morse_to_optimize
+from visualization.wavefunc_comp import extract_qumode_info
+from utils.constants import time, N
+from optimization.optimize_info import morse_to_optimize
 
 
 def gen_wigfunc(wig_init_qubit_state, wig_init_qumode_state, time_and_extra, steps, generated_hamiltonian):

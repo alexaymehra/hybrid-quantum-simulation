@@ -1,7 +1,7 @@
 """
 Filename: optimize_info.py
 Author: Alexay Mehra
-Date: 2025-09-09
+Date: 2025-09-10
 Description: Builds the gate sequence, defines the cost function, creates instance of the time evolution to match
 """
 
@@ -10,8 +10,8 @@ import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
 
-from src.utils.constants import time, mass, diss_energy, width_param, equib_length, omega, chi, hbar, morse_cap, N
-from src.utils.myops import D_full, R_full, H_On_Evo, MH_Evo
+from utils.constants import time, mass, diss_energy, width_param, equib_length, N
+from utils.myops import D_full, R_full, H_On_Evo, MH_Evo
 
 # Build the Gate Sequence (Always-On Time Evolution, Displacement Gate, XY Rotation Gate)
 def gate_seq(params, d):

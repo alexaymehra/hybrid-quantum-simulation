@@ -12,7 +12,7 @@ import scipy.optimize as sp_opt
 from .optimize_info import fidelity_loss, morse_to_optimize
 
 
-# Optimization Function
+# Main Optimization Function
 def run_optimization(d, mode='simple', max_iterations=5):
     # there will be a [Re(α), Im(α), θ, φ] per gate sequence
     init_guess = np.random.rand(d * 4) * 0.1   # Provides small initial guess near 0
@@ -37,7 +37,6 @@ def simple_optimization(d, init_guess):
 
 
 
-# Optimization Function
 def coordinate_descent_optimization(d, init_guess, max_iter):
     # Optimizes Parameters one at a time (coordinate descent)
 
@@ -83,7 +82,6 @@ def coordinate_descent_optimization(d, init_guess, max_iter):
 
 
 
-# Function to Print the Optimized Parameters
 def print_optimal_params(params, d):
     print("Optimized Paramters")
     for i in range(d):

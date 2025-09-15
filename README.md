@@ -11,14 +11,14 @@ This repository contains optimization pipelines using NumPy and SciPy to calibra
 ```plaintext
 MorsePotential/
 │
+├── docs/             # Additional documents
+|
+├── notebooks/        # Jupyter notebooks for experiments
+|
 ├── src/              # Core Python source code
 │   ├── optimization/ # Optimization routines 
 │   ├── visualization/# Plotting scripts
 │   └── utils/        # Helper functions and variables
-│
-├── notebooks/        # Jupyter notebooks for experiments
-|
-├── docs/             # Additional documents
 |
 ├── .gitignore
 ├── LICENSE

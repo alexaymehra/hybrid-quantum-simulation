@@ -20,6 +20,7 @@ MorsePotential/
 |
 ├── docs/             # Additional documents
 |
+├── .gitignore
+├── LICENSE
 ├── README.md
-├── requirements.txt
-└── .gitignore
+└── requirements.txt

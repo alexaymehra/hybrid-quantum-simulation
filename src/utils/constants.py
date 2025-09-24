@@ -8,23 +8,29 @@ Description: Holds constants to be used in operators.
 # Imports
 import numpy as np
 
-time = 1 # Time to optimize over
 
-# Parameters for Morse Potential
-mass = 1
-diss_energy = 8
-width_param = 1
-equib_length = 0
+class MorsePotential():
+    """
+    Create an Instance of the Morse Potential:
+    m = mass
+    de = well depth
+    b = width parameter
+    x0 = equilibrium length of the bond
+    hbar = Reduced Planck's Constant (default 1 for easy units)
+    """
+    def __init__(self, mass=1, de=8, b=1, x0=0, hbar=1):
+        self.mass = mass
+        self.de = de
+        self.b = b
+        self.x0 = x0
+        self.hbar = hbar
+        self.morse_cap = (int) (np.sqrt(2 * mass * de) / (b * hbar) - (1/2))
+        return
+
+time = 1 # Time to optimize over
 
 # Oscillator Parameters
 omega = 1.0  # Oscillator frequency
 chi = 0.01   # Qubit-oscillator coupling
-
-# Parameters for units
-hbar = 1 
-
-# Trruncate the Fock Space Based on the number of states supported by the Morse Potential
-morse_cap = (int) (np.sqrt(2 * mass * diss_energy) / (width_param * hbar) - (1/2))
-
 
 N = 10

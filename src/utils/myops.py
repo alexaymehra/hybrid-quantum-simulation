@@ -16,21 +16,31 @@ import scipy as sp
 
 from utils.constants import omega, chi, hbar, N
 
+class Gates():
+    dim = 20
+    time = 1
 
-I_q = np.eye(2) #Identity operator for qubits
-I_o = np.eye(N) #Identity operator for qumodes
+    I_q = np.eye(2)                                     # Identity operator for qubits
+    I_o = np.eye(dim)                                   # Identity operator for qumodes
 
-a = np.diag(np.sqrt(np.arange(1, N)), 1)  # Annihilation operator
-adag = a.T.conj()                         # Creation operator
-n_op = adag @ a                           # Photon number operator
+    a = np.diag(np.sqrt(np.arange(1, dim)), 1)          # Annihilation operator
+    adag = a.T.conj()                                   # Creation operator
+    n_op = adag @ a                                     # Photon number operator
 
-# Pauli Matrices for qubit
-sigma_x = np.array([[0, 1], [1, 0]])
-sigma_y = np.array([[0, -1j], [1j, 0]])
-sigma_z = np.array([[1, 0], [0, -1]])
+    sigma_x = np.array([[0, 1], [1, 0]])                # Pauli X Gate
+    sigma_y = np.array([[0, -1j], [1j, 0]])             # Pauli Y Gate
+    sigma_z = np.array([[1, 0], [0, -1]])               # Pauli Z Gate
 
-H_always_on = (chi * sigma_z + omega * np.eye(2))  # Always-on Hamiltonian for a cavity-QED System
-H_always_on = np.kron(H_always_on, n_op)           # Full Always-on Hamiltonian (Qubit-Qumode Hilbert Space)
+    H_always_on = (chi * sigma_z + omega * np.eye(2))   # Always-on Hamiltonian for a cavity-QED System
+    H_always_on = np.kron(H_always_on, n_op)            # Full Always-on Hamiltonian (Qubit-Qumode Hilbert Space)
+
+    def __init__(self, dim=20):
+        self.dim = dim
+        return
+    
+    def always
+    
+    
 
 # Always-on Time Evolution
 def H_On_Evo(t):

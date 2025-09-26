@@ -2,19 +2,13 @@
 Filename: myops.py
 Author: Alexay Mehra
 Date: 2025-09-10
-Description: Builds operators that will be used in the simulation:
-- Morse Hamiltonian and time evolution
-- Always-on Hamiltonain
-- Displacement gate
-- Qubit xy-rotation gate
-- Other prerequisite gates
+
 """
 
 # Imports
 import numpy as np
 import scipy as sp
 
-from utils.constants import omega, chi, hbar, N
 
 class Gates():
     dim = 20
@@ -29,27 +23,38 @@ class Gates():
 
     sigma_x = np.array([[0, 1], [1, 0]])                # Pauli X Gate
     sigma_y = np.array([[0, -1j], [1j, 0]])             # Pauli Y Gate
-    sigma_z = np.array([[1, 0], [0, -1]])               # Pauli Z Gate
-
-    H_always_on = (chi * sigma_z + omega * np.eye(2))   # Always-on Hamiltonian for a cavity-QED System
-    H_always_on = np.kron(H_always_on, n_op)            # Full Always-on Hamiltonian (Qubit-Qumode Hilbert Space)
+    sigma_z = np.array([[1, 0], [0, -1]])               # Pauli Z Gatez
 
     def __init__(self, dim=20):
         self.dim = dim
         return
     
-    def always
+    def always_on_evolution(self, omega=1, chi=0.01, t=time):
+        qubit_part = (chi * self.sigma_z + omega * self.I_q)      
+        hamiltonian = np.kron(qubit_part, self.n_op)
+        evolution = sp.linalg.expm(-1j * hamiltonian * t)
+        return evolution
     
+    def displacement(self, alpha):
+        A = alpha * self.adag - np.conj(alpha) * self.a
+        return sp.linalg.expm(A) 
     
+    def full_displacement(self):
+        pass
 
-# Always-on Time Evolution
-def H_On_Evo(t):
-    return sp.linalg.expm(-1j * H_always_on * t)
+    def qubit_xy_rotation(self):
+        pass
 
-# Dispacement Gate 
-def displacement(alpha):
-    A = alpha * adag - np.conj(alpha) * a
-    return sp.linalg.expm(A)
+    def full_qubit_xy_rotation(self):
+        pass
+
+    def morse_hamiltonian(self):
+        pass
+
+    def morse_time_evolution(self):
+        pass
+
+
 
 # Dispacement Gate (Qubit-Qumode Hilbert Space)
 def D_full(alpha):

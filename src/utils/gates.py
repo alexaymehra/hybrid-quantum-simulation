@@ -1,8 +1,8 @@
 """
-Filename: myops.py
+Filename: gates.py
 Author: Alexay Mehra
 Date: 2025-09-28
-
+Description: Holds the matrix definitions for the d
 """
 
 # Imports
@@ -10,30 +10,30 @@ import numpy as np
 import scipy as sp
 
 
-class Gates():
-    dim = 20
-    time = 1
+class Gates:
+    
+    I_q = np.eye(2)                                         # Identity operator for qubits
 
-    I_q = np.eye(2)                                     # Identity operator for qubits
-    I_o = np.eye(dim)                                   # Identity operator for qumodes
-
-    a = np.diag(np.sqrt(np.arange(1, dim)), 1)          # Annihilation operator
-    adag = np.transpose(np.conj(a))                     # Creation operator
-    n_op = adag @ a                                     # Photon number operator
-
-    x_op = (a + adag)/(np.sqrt(2))                      # Position quadrature operator
-    p_op = -1j * (a - adag)/(np.sqrt(2))                # Momentum quadrature operator
-
-    sigma_x = np.array([[0, 1], [1, 0]])                # Pauli X Gate
-    sigma_y = np.array([[0, -1j], [1j, 0]])             # Pauli Y Gate
-    sigma_z = np.array([[1, 0], [0, -1]])               # Pauli Z Gatez
-
+    sigma_x = np.array([[0, 1], [1, 0]])                    # Pauli X Gate
+    sigma_y = np.array([[0, -1j], [1j, 0]])                 # Pauli Y Gate
+    sigma_z = np.array([[1, 0], [0, -1]])                   # Pauli Z Gatez
+    
     def __init__(self, dim=20, time=1):
         self.dim = dim
         self.time = time
-        return
-    
-    def always_on_evolution(self, omega=1, chi=0.01, t=time):
+
+        self.I_o = np.eye(dim)                              # Identity operator for qumodes
+
+        self.a = np.diag(np.sqrt(np.arange(1, dim)), 1)     # Annihilation operator
+        self.adag = np.transpose(np.conj(self.a))           # Creation operator
+        self.n_op = self.adag @ self.a                      # Photon number operator
+
+        self.x_op = (self.a + self.adag)/(np.sqrt(2))       # Position quadrature operator
+        self.p_op = -1j * (self.a - self.adag)/(np.sqrt(2)) # Momentum quadrature operator
+
+
+    # The time used here should be the time the morse is optimized over divided by num steps
+    def always_on_evolution(self, omega=1, chi=0.01, t=1):
         qubit_part = (chi * self.sigma_z + omega * self.I_q)      
         hamiltonian = np.kron(qubit_part, self.n_op)
         evolution = sp.linalg.expm(-1j * hamiltonian * t)
@@ -58,9 +58,6 @@ class Gates():
         return full_gate
 
     def morse_hamiltonian(self, mp):
-        """
-        Create the Morse Hamiltonian from the given parameters
-        """
         phys_x = np.sqrt(mp.hbar / (mp.mass * mp.angular_freq)) * self.x_op
         phys_p = np.sqrt(mp.hbar * mp.mass * mp.angular_freq) * self.p_op
         

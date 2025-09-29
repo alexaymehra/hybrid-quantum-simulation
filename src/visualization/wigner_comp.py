@@ -11,16 +11,13 @@ import scipy as sp
 import matplotlib.pyplot as plt
 from qutip import Qobj, wigner
 
-from visualization.wavefunc_comp import extract_qumode_info
-from utils.constants import time, N
-from optimization.optimize_info import morse_to_optimize
+from .info_extract import extract_qumode_info
 
-
-def gen_wigfunc(wig_init_qubit_state, wig_init_qumode_state, time_and_extra, steps, generated_hamiltonian):
+def gen_wigfunc(wig_init_qubit_state, wig_init_qumode_state, time_and_extra, steps, generated_hamiltonian, backend, morse_to_optimize):
         
 
     # Extract the Hamiltonian from the Time Evolution
-    target_hamiltonian = (1j / time) * sp.linalg.logm(morse_to_optimize)
+    target_hamiltonian = (1j / backend.time) * sp.linalg.logm(morse_to_optimize)
 
 
     time_step = time_and_extra / steps
@@ -47,12 +44,12 @@ def gen_wigfunc(wig_init_qubit_state, wig_init_qumode_state, time_and_extra, ste
         fidelity = np.abs(np.vdot(step_state_generated, step_state_target))**2
         print(f"Fidelity at t = {t:.2f}: {fidelity:.6f}")
 
-        qumode_generated = extract_qumode_info(step_state_generated, qubit_state_index=0, qumode_dim=N)
-        qumode_target = extract_qumode_info(step_state_target, qubit_state_index=0, qumode_dim=N)
+        qumode_generated = extract_qumode_info(step_state_generated, qubit_state_index=0, qumode_dim=backend.dim)
+        qumode_target = extract_qumode_info(step_state_target, qubit_state_index=0, qumode_dim=backend.dim)
 
         # Convert to Qobj
-        step_qobj_generated = Qobj(qumode_generated, dims=[N, [1]])
-        step_qobj_target = Qobj(qumode_target, dims=[N, [1]])
+        step_qobj_generated = Qobj(qumode_generated, dims=[backend.dim, [1]])
+        step_qobj_target = Qobj(qumode_target, dims=[backend.dim, [1]])
 
         # Compute Wigner functions
         W_gen = wigner(step_qobj_generated, xvec, xvec)
@@ -76,5 +73,3 @@ def gen_wigfunc(wig_init_qubit_state, wig_init_qumode_state, time_and_extra, ste
     fig.colorbar(im1, ax=axes, location='right', shrink=0.8, label='Wigner Function Value')
 
     plt.show()
-
-    return

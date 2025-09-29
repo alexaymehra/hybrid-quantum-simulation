@@ -10,95 +10,70 @@ import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
 
-from utils.constants import mass, hbar, omega, time, N
-from optimization.optimize_info import morse_to_optimize
+from .info_extract import extract_qumode_info, extract_wavefunction
 
-
-# Function to Extract the Qumode Information from the Joint Qubit-Qumode State
-def extract_qumode_info(hybrid_state, qubit_state_index, qumode_dim):
-    """
+# Generate and plot the time evolution of a qubit-qumode state in the position basis -----
+# ----------------------------------------------------------------------------------------
+def generate_wavefunc(init_qubit_state, init_qumode_state, target_time, n_steps, gen_hamiltonian, mp, N, morse_to_optimize):
+    """    
     Args:
-        hybrid_state: full state vector of shape (2 * qumode_dim,)
-        qubit_state_index: 0 or 1
-        qumode_dim: dimension of the qumode Fock space
-
-    Returns:
-        qumode_state: complex ndarray of shape (qumode_dim,)
+        init_qubit_state: ndarray, initial qubit state vector
+        init_qumode_state: ndarray, initial qumode state vector in Fock basis
+        target_time: float, final time for evolution
+        n_steps: int, number of time points to evaluate
+        gen_hamiltonian: ndarray, Hamiltonian for synthesized evolution
+        mp: object, contains mass, angular frequency, hbar for Morse potential
+        N: int, dimension of qumode Fock space
+        morse_to_optimize: ndarray, target unitary for Morse potential evolution
     """
-    assert hybrid_state.shape[0] == 2 * qumode_dim
-    start = qubit_state_index * qumode_dim
-    end = start + qumode_dim
-    return hybrid_state[start:end]
 
-# Function to Project to the Position Basis
-def fock_basis_to_position(x, N, m=mass, hbar=hbar, omega=omega):
-    """
-    Returns T[i, n] = ⟨x_i | n⟩, i.e., harmonic oscillator wavefunction for n-th Fock state at position x_i
-    """
-    xi = np.sqrt(m * omega / hbar) * x
-    prefactor = (m * omega / (np.pi * hbar))**0.25
-    T = np.zeros((len(x), N), dtype=complex)
+    tgt_hamiltonian = (1j / target_time) * sp.linalg.logm(morse_to_optimize)  # convert target unitary to effective Hamiltonian
+    x_var = np.linspace(-2, 8, 200)                                           # positions where psi(x) will be evaluated
+    init_state = np.kron(init_qubit_state, init_qumode_state)                 # Create full initial state in the joint qubit-qumode Hilbert space
+    times = np.linspace(0, target_time, n_steps)                              # time points for the time evolution
 
-    for n in range(N):
-        norm = 1 / np.sqrt(2**n * sp.special.factorial(n))
-        Hn = sp.special.eval_hermite(n, xi)
-        psi_n = prefactor * norm * np.exp(-0.5 * xi**2) * Hn
-        T[:, n] = psi_n
-
-    return T
-
-def generate_wavefunc(init_qubit_state, init_qumode_state, target_time, n_steps, gen_hamiltonian):
-
-    # Extract the Hamiltonian from the Time Evolution
-    tgt_hamiltonian = (1j / time) * sp.linalg.logm(morse_to_optimize)
-
-    # Parameters
-    x_var = np.linspace(-2, 8, 200)
-    topos = fock_basis_to_position(x_var, N)
-
-    # Create the Initial State in the Full Qubit-Qumode Hilbert Space
-    init_state = np.kron(init_qubit_state, init_qumode_state)
-
-    # --- Time Steps ---
-    times = np.linspace(0, target_time, n_steps)
-
-    # --- Setup plot grid ---
+    # Setup plot grid
     cols = 3
-    rows = (n_steps + cols - 1) // cols
+    rows = (n_steps + cols - 1) // cols                                       
     fig, axes = plt.subplots(rows, cols, figsize=(5 * cols, 3 * rows), constrained_layout=True)
-    axes = axes.flatten()
+    axes = axes.flatten()                                                      
 
-    # --- Loop through time evolution ---
+    # Loop through each time step
     for i, t in enumerate(times):
-        ax = axes[i]
+        ax = axes[i]                                                          # current axis to plot on
 
-        # Evolve under synthesized
-        U_gen_t = sp.linalg.expm(-1j * gen_hamiltonian * t)
-        psi_gen_t = U_gen_t @ init_state
-        psi_gen = extract_qumode_info(psi_gen_t, 0, N)
-        psi_gen_x = topos @ psi_gen
+        # --- Evolve under synthesized Hamiltonian ---
+        U_gen_t = sp.linalg.expm(-1j * gen_hamiltonian * t)                   # time evolution operator
+        psi_gen_t = U_gen_t @ init_state                                      # evolve full hybrid state
+        psi_gen, norm_gen = extract_qumode_info(psi_gen_t, 0, N)                     # extract qumode component for qubit |0>
+        psi_gen_x = extract_wavefunction(psi_gen, x_var, mp) * norm_gen                  # project qumode to position basis
+        #psi_gen_x /= np.sqrt(np.sum(np.abs(psi_gen_x)**2) * (x_var[1]-x_var[0]))
+        
 
-        # Evolve under true
-        U_tgt_t = sp.linalg.expm(-1j * tgt_hamiltonian * t)
-        psi_tgt_t = U_tgt_t @ init_state
-        psi_tgt = extract_qumode_info(psi_tgt_t, 0, N)
-        psi_tgt_x = topos @ psi_tgt
+        # --- Evolve under target Hamiltonian ---
+        U_tgt_t = sp.linalg.expm(-1j * tgt_hamiltonian * t)                   # target evolution operator
+        psi_tgt_t = U_tgt_t @ init_state                                      # evolve full hybrid state
+        psi_tgt, norm_tgt = extract_qumode_info(psi_tgt_t, 0, N)                     # extract qumode component
+        psi_tgt_x = extract_wavefunction(psi_tgt, x_var, mp) * norm_tgt               # project to position basis
+        #psi_tgt_x /= np.sqrt(np.sum(np.abs(psi_tgt_x)**2) * (x_var[1]-x_var[0]))
 
-        # Plot
-        ax.plot(x_var, np.abs(psi_gen_x)**2, label='Synthesized', color='red')
-        ax.plot(x_var, np.abs(psi_tgt_x)**2, label='Target', color='blue', linestyle='--')
-        ax.set_title(f'Time = {round(t, 2)}')
-        ax.set_xlabel('x')
-        ax.set_ylabel(r'$|\psi(x,t)|^2$')
-        ax.grid(True)
 
-    # Remove unused axes
+        # --- Plot ---
+        ax.plot(x_var, np.abs(psi_gen_x)**2, label='Synthesized', color='red') # plot probability density for generated evolution
+        ax.plot(x_var, np.abs(psi_tgt_x)**2, label='Target', color='blue', linestyle='--') # plot target
+        ax.set_title(f'Time = {round(t, 2)}')                                 # set subplot title
+        ax.set_xlabel('x')                                                    # x-axis label
+        ax.set_ylabel(r'$|\psi(x,t)|^2$')                                     # y-axis label
+        ax.grid(True)                                                          # add grid
+
+    # Remove unused axes if n_steps < rows*cols
     for j in range(len(times), len(axes)):
         fig.delaxes(axes[j])
 
-    # Shared legend and title
-    handles, labels = axes[0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc='upper left', ncol=2, fontsize='medium')
-    plt.suptitle(f'Time Evolution of State in Position Basis', fontsize=16)
-    plt.show()
-    return
+    # Add shared legend and super-title
+    handles, labels = axes[0].get_legend_handles_labels()                     # get handles from first subplot
+    fig.legend(handles, labels, loc='upper left', ncol=2, fontsize='medium') # shared legend
+    plt.suptitle('Time Evolution of State in Position Basis', fontsize=16)    # figure title
+    plt.show()                                                                 # display figure
+# ----------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------

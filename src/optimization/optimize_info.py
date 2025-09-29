@@ -1,50 +1,48 @@
 """
-Filename: optimize_info.py
+Filename: gate_specs.py
 Author: Alexay Mehra
-Date: 2025-09-10
-Description: Builds the gate sequence, defines the cost function, creates instance of the time evolution to match
+Date: 2025-09-28
+Description: 
 """
 
 
+# Imports
 import numpy as np
-import scipy as sp
-import matplotlib.pyplot as plt
-
-class OptimizationInfo:
-    def __init__(self, mp, gates):
-        self.mp = mp
-    
 
 
-    # Build the Gate Sequence (Always-On Time Evolution, Displacement Gate, XY Rotation Gate)
-    def gate_seq(self, params, d):
-        """
-        Builds the Gate Sequence
-        Params: Each layer is a list of 4 parameters
-        1. alpha_real - real part of alpha which shifts position
-        2. alpha_imag - imaginary part of alpha which shifts momentum
-        3. theta - one of the parameters for the xy qubit rotation gate
-        4. phi - one of the parameters for the xy qubit rotaation gate
-        
-        """
-        U = np.eye(2 * N, dtype=complex)
-        for j in range(d):
-            alpha_real = params[4*j]
-            alpha_imag = params[4*j+1]
-            theta = params[4*j+2]
-            phi = params[4*j+3]
-            
-            D = D_full(alpha_real + 1j * alpha_imag)
-            R = R_full(theta, phi)
-            V = H_On_Evo(time)
+# Building a generic gate sequence -------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+"""
+Builds the full gate sequence for d layers:
 
-            U = U @ V @ R @ D
-        return U
+params       : flat array of optimization parameters
+seq_template : list of GateSpec objects representing a single layer
+backend      : backend object with operators
+d            : number of times to repeat the layer
+"""
+def build_sequence(params, seq_template, backend, d=1):
+    tot_dim = backend.I_o.shape[0] * backend.I_q.shape[0]   # total hilbert space dimension
+    U = np.eye(tot_dim, dtype=complex)                      # starting point for the sequence
+    idx = 0                                                 # keeps track of position in params
 
-    # Definition of the cost (infidelity) function
-    def fidelity_loss(self, params, d, U_target):
-        U = gate_seq(params, d)
-        dim = U.shape[0]
-        fid = np.abs(np.trace(U.conj().T @ U_target))/ (dim)
-        return 1 - fid
+    full_seq = seq_template * d                             # repeat the sequence d times
 
+    for gate in full_seq:                                   # loop through all gates in the sequence
+        gate_params = params[idx: idx + gate.n_params]      # slice out parameters for the current gate
+        U = U @ gate.build(gate_params, backend)            # multiply the gate into the sequence
+        idx += gate.n_params                                # increment idx
+
+    return U                                                # return full sequence
+# ----------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+
+
+# Cost (Infidelity) Function -------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+def fidelity_loss(params, seq_template, backend, d, U_target):
+    U = build_sequence(params, seq_template, backend, d)
+    dim = U.shape[0]
+    fid = np.abs(np.trace(U.conj().T @ U_target))/ (dim)
+    return 1 - fid
+# ----------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------

@@ -5,11 +5,14 @@ Date: 2025-09-28
 Description: Holds the matrix definitions for the d
 """
 
+
 # Imports
 import numpy as np
 import scipy as sp
 
 
+# Gates Class ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
 class Gates:
     
     I_q = np.eye(2)                                         # Identity operator for qubits
@@ -78,3 +81,5 @@ class Gates:
         exp_pos = sp.linalg.expm(-1j* pos * self.time)
         exp_kin = sp.linalg.expm(-1j* kin * self.time)
         return exp_ham, exp_pos, exp_kin
+# ----------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------

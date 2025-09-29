@@ -1,72 +1,85 @@
 """
 Filename: optimize_func.py
 Author: Alexay Mehra
-Date: 2025-09-12
+Date: 2025-09-29
 Description: Contains the optimization functions and a function to print optimal parameters
 """
+
 
 # Imports
 import numpy as np
 import scipy.optimize as sp_opt
 
-from .optimize_info import fidelity_loss, morse_to_optimize
 
-
-# Main Optimization Function
-def run_optimization(d, mode='simple', max_iterations=5):
-    # there will be a [Re(α), Im(α), θ, φ] per gate sequence
-    init_guess = np.random.rand(d * 4) * 0.1   # Provides small initial guess near 0
-
-    if (mode == 'coordinate-descent'):
-        return coordinate_descent_optimization(d, init_guess, max_iterations)
-    else:
-        return simple_optimization(d, init_guess)
+# Main Optimization Function -------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+def run_optimization(seq_template, d, mode='simple', max_iterations=5):
+    # total number of parameters across d layers
+    n_params_per_layer = sum(g.n_params for g in seq_template)
+    total_params = n_params_per_layer * d
     
+    init_guess = np.random.rand(total_params) * 0.1   # small random initial guess
+    
+    if mode == 'coordinate-descent':
+        return coordinate_descent_optimization(seq_template, d, init_guess, max_iterations)
+    else:
+        return simple_optimization(seq_template, d, init_guess)
+# ----------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
 
 
-def simple_optimization(d, init_guess):
+# Simple Optimization Function -----------------------------------------------------------
+# ----------------------------------------------------------------------------------------
+def simple_optimization(seq_template, d, init_guess):
     result = sp_opt.minimize(
         fidelity_loss,          
         init_guess,
-        args=(d, morse_to_optimize),
+        args=(seq_template, d, morse_to_optimize),   # pass seq_template in
         method='BFGS',
         options={'disp': True}
     )
-
     return result.x
+# ----------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
 
 
+# Optimization that works on one gate type at a time -------------------------------------
+# ----------------------------------------------------------------------------------------
+def coordinate_descent_optimization(seq_template, d, init_guess, max_iter):
+    """
+    Coordinate descent optimization, grouped by gate type across layers.
+    All gates of the same type (e.g. all Displacements) are optimized together.
+    
+    seq_template : list of GateSpec objects (1 layer definition)
+    d            : number of layers to repeat
+    init_guess   : initial parameter vector (flat numpy array)
+    max_iter     : number of outer passes over all groups
+    """
+    curr_params = init_guess.copy()                 
 
-def coordinate_descent_optimization(d, init_guess, max_iter):
-    # Optimizes Parameters one at a time (coordinate descent)
+    # --- Build groups by gate type across all layers ---
+    groups = {}
+    idx = 0
+    for layer in range(d):
+        for gate in seq_template:
+            indices = list(range(idx, idx + gate.n_params))
+            groups.setdefault(gate.name, []).extend(indices)
+            idx += gate.n_params
 
-    curr_params = init_guess.copy()
-
-    # Dictionary to hold group names and indices
-    groups = {
-        "alpha_real": np.arange(0, d * 4, 4),
-        "alpha_imag": np.arange(1, d * 4, 4),
-        "theta":      np.arange(2, d * 4, 4),
-        "phi":        np.arange(3, d * 4, 4),
-    }
-
-    # number of loops through all blocks
+    # --- Optimization loop ---
     for it in range(max_iter):
+        for gname, indices in groups.items():
 
-        # passes through each block in turn
-        for group_name, indices in groups.items():
-            
-            # const function restricted to just one block
-            # only the positions indicated by indices will be replaced by candidate values block_vars
-            # since only the chosen block is changed, the cost is optimized with respect to just those vars
+            # cost function restricted to a single gate type
+            # only positions in that block's indicies will be changed
             def f_block(block_vars):
                 temp = curr_params.copy()
                 temp[indices] = block_vars
-                return fidelity_loss(temp, d, morse_to_optimize)
-            
-            # Current values for this block
+                return fidelity_loss(temp, seq_template, d, morse_to_optimize)
+
+            # current values for this blocks
             x0_block = curr_params[indices]
-            
+
             res = sp_opt.minimize(
                 f_block,
                 x0_block,
@@ -74,24 +87,30 @@ def coordinate_descent_optimization(d, init_guess, max_iter):
                 options={"disp": False}
             )
 
-            curr_params[indices] = res.x # init_guess gets modified in place so the next iteration sees updated values
-            curr_infid = fidelity_loss(curr_params, d, morse_to_optimize)
-            print(f"Optimized {group_name}, Iteration {it}\nCurrent Infidelity: {curr_infid}\n")
-    
+            # modifies the parameters in place so next iteration sees updated values
+            curr_params[indices] = res.x
+            
+            # print optimization information
+            curr_infid = fidelity_loss(curr_params, seq_template, d, morse_to_optimize)
+            print(f"Optimized {gname}, Iteration {it}")
+            print(f"Current Infidelity: {curr_infid:.6f}\n")
+
     return curr_params
+# ----------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
 
 
-
-def print_optimal_params(params, d):
-    print("Optimized Paramters")
-    for i in range(d):
-        re_alpha = params[i * 4 + 0]
-        im_alpha = params[i * 4 + 1]
-        theta    = params[i * 4 + 2]
-        phi      = params[i * 4 + 3]
-        
-        print(f"Gate {i+1}:")
-        print(f"  α     = {re_alpha:.4f} + {im_alpha:.4f}j")
-        print(f"  θ     = {theta:.4f}")
-        print(f"  φ     = {phi:.4f}")
+# Print the optimal parameters found -----------------------------------------------------
+# ----------------------------------------------------------------------------------------
+def print_optimal_params(params, seq_template, d):
+    print("Optimized Parameters")
+    idx = 0
+    for layer in range(d):
+        print(f"Layer {layer+1}:")
+        for gate in seq_template:
+            gate_params = params[idx: idx + gate.n_params]
+            print(f"  {gate.name}: {gate_params}")
+            idx += gate.n_params
         print("-" * 30)
+# ----------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------

@@ -13,7 +13,7 @@ import scipy.optimize as sp_opt
 
 # Main Optimization Function -------------------------------------------------------------
 # ----------------------------------------------------------------------------------------
-def run_optimization(seq_template, d, mode='simple', max_iterations=5):
+def run_optimization(seq_template, backend, d, loss_function, target_evolution, mode='simple', max_iterations=5):
     # total number of parameters across d layers
     n_params_per_layer = sum(g.n_params for g in seq_template)
     total_params = n_params_per_layer * d
@@ -21,20 +21,20 @@ def run_optimization(seq_template, d, mode='simple', max_iterations=5):
     init_guess = np.random.rand(total_params) * 0.1   # small random initial guess
     
     if mode == 'coordinate-descent':
-        return coordinate_descent_optimization(seq_template, d, init_guess, max_iterations)
+        return coordinate_descent_optimization(seq_template, backend, d, init_guess, loss_function, target_evolution, max_iterations)
     else:
-        return simple_optimization(seq_template, d, init_guess)
+        return simple_optimization(seq_template, backend, d, init_guess, loss_function, target_evolution)
 # ----------------------------------------------------------------------------------------
 # ----------------------------------------------------------------------------------------
 
 
 # Simple Optimization Function -----------------------------------------------------------
 # ----------------------------------------------------------------------------------------
-def simple_optimization(seq_template, d, init_guess):
+def simple_optimization(seq_template, backend, d, init_guess, loss_function, target_evolution):
     result = sp_opt.minimize(
-        fidelity_loss,          
+        loss_function,          
         init_guess,
-        args=(seq_template, d, morse_to_optimize),   # pass seq_template in
+        args=(seq_template, backend, d, target_evolution),   # pass seq_template in
         method='BFGS',
         options={'disp': True}
     )
@@ -45,7 +45,7 @@ def simple_optimization(seq_template, d, init_guess):
 
 # Optimization that works on one gate type at a time -------------------------------------
 # ----------------------------------------------------------------------------------------
-def coordinate_descent_optimization(seq_template, d, init_guess, max_iter):
+def coordinate_descent_optimization(seq_template, backend, d, init_guess, loss_function, target_evolution, max_iter):
     """
     Coordinate descent optimization, grouped by gate type across layers.
     All gates of the same type (e.g. all Displacements) are optimized together.
@@ -75,7 +75,7 @@ def coordinate_descent_optimization(seq_template, d, init_guess, max_iter):
             def f_block(block_vars):
                 temp = curr_params.copy()
                 temp[indices] = block_vars
-                return fidelity_loss(temp, seq_template, d, morse_to_optimize)
+                return loss_function(temp, seq_template, backend, d, target_evolution)
 
             # current values for this blocks
             x0_block = curr_params[indices]
@@ -91,7 +91,7 @@ def coordinate_descent_optimization(seq_template, d, init_guess, max_iter):
             curr_params[indices] = res.x
             
             # print optimization information
-            curr_infid = fidelity_loss(curr_params, seq_template, d, morse_to_optimize)
+            curr_infid = loss_function(curr_params, seq_template, d, target_evolution)
             print(f"Optimized {gname}, Iteration {it}")
             print(f"Current Infidelity: {curr_infid:.6f}\n")
 

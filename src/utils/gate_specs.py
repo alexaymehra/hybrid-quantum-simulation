@@ -32,14 +32,14 @@ class GateSpec:
 DisplacementGate = GateSpec(
     "Displacement",
     2,
-    lambda params, backend: backend.full_displacement(params[0] + 1j*params[1])
+    lambda params, backend, config: backend.full_displacement(params[0] + 1j*params[1])
 )
 
 
 RotationGate = GateSpec(
     "XY Rotation",
     2,
-    lambda params, backend: backend.full_qubit_xy_rotation(params[0], params[1])
+    lambda params, backend, config: backend.full_qubit_xy_rotation(params[0], params[1])
 )
 
 

@@ -62,6 +62,8 @@ def coordinate_descent_optimization(seq_template, backend, d, init_guess, loss_f
     idx = 0
     for layer in range(d):
         for gate in seq_template:
+            if gate.n_params == 0:
+                continue
             indices = list(range(idx, idx + gate.n_params))
             groups.setdefault(gate.name, []).extend(indices)
             idx += gate.n_params
@@ -91,8 +93,8 @@ def coordinate_descent_optimization(seq_template, backend, d, init_guess, loss_f
             curr_params[indices] = res.x
             
             # print optimization information
-            curr_infid = loss_function(curr_params, seq_template, d, target_evolution)
-            print(f"Optimized {gname}, Iteration {it}")
+            curr_infid = loss_function(curr_params, seq_template, backend, d, target_evolution)
+            print(f"Optimized {gname}, Iteration {it + 1}")
             print(f"Current Infidelity: {curr_infid:.6f}\n")
 
     return curr_params

@@ -21,7 +21,7 @@ class MorsePotential:
     x0 = equilibrium bond length
     hbar = Reduced Planck's Constant (default 1 for easy units)
     """
-    def __init__(self, mass=1, de=8, b=1, x0=0, hbar=1):
+    def __init__(self, mass=1.0, de=8.0, b=1.0, x0=0.0, hbar=1.0):
         self.mass = mass
         self.de = de
         self.b = b
@@ -30,7 +30,7 @@ class MorsePotential:
         self.force_const = 2 * de * (b ** 2)
         self.angular_freq = b * np.sqrt(2 * de / mass)
         lamda = np.sqrt(2 * mass * de) / (b * hbar)
-        self.num_bound_states = np.floor(lamda - (1/2)) + 1
+        self.num_bound_states = np.floor(lamda - (0.5)) + 1
         self.max_q_number = self.num_bound_states - 1
 
     def plot_potential(self):

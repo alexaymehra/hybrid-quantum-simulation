@@ -48,11 +48,22 @@ SqueezingGate = GateSpec(
 )
 
 RotationGate = GateSpec(
-    "XY Rotation",
+    "Qubit XY Rotation",
     2,
     lambda params, backend, config: backend.full_qubit_xy_rotation(params[0], params[1])
 )
 
+ControlledDisplacement = GateSpec(
+    "Controlled Displacement",
+    1,
+    lambda params, backend, config: backend.controlled_displacement(params[0])
+)
+
+ControlledCVRotation = GateSpec(
+    "Controlled CV Rotation",
+    1,
+    lambda params, backend, config: backend.controlled_cv_rotation(params[0])
+)
 
 AlwaysOnGate = GateSpec(
     "Always-On Evolution",

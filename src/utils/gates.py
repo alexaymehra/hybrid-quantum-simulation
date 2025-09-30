@@ -17,6 +17,9 @@ class Gates:
     
     I_q = np.eye(2)                                         # Identity operator for qubits
 
+    proj0 = np.array([1, 0], [0, 0])                        # Projector to qubit 0 state
+    proj1 = np.array([0, 0],[0, 1])                         # Projector to qubit 1 state
+
     sigma_x = np.array([[0, 1], [1, 0]])                    # Pauli X Gate
     sigma_y = np.array([[0, -1j], [1j, 0]])                 # Pauli Y Gate
     sigma_z = np.array([[1, 0], [0, -1]])                   # Pauli Z Gatez
@@ -64,17 +67,18 @@ class Gates:
     def full_squeezing(self, theta):
         return np.kron(self.I_q, self.full_squeezing(theta))
 
-    def beamsplitter(self):
-        pass
+    def controlled_displacement(self, alpha):
+        exponent = alpha * self.adag - np.conj(alpha) * self.a
+        disp = sp.linalg.expm(exponent)
+        part0 = np.kron(self.proj0, self.I_o)
+        part1 = np.kron(self.proj1, disp)
+        return part0 + part1
 
-    def full_beamsplitter(self):
-        pass
-
-    def condition_displacement(self):
-        pass
-
-    def conditional_rotation(self):
-        pass
+    def controlled_cv_rotation(self, theta):
+        cv_rot = sp.linalg.expm(-1j * theta * self.n_op)
+        part0 = np.kron(self.proj0, self.I_o)
+        part1 = np.kron(self.proj1, cv_rot)
+        return part0 + part1
 
     def qubit_xy_rotation(self, theta, phi):
         exponent = (np.cos(phi) * self.sigma_x + np.sin(phi) * self.sigma_z)

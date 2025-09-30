@@ -1,3 +1,3 @@
 from .morse import MorsePotential
 from .gates import Gates
-from .gate_specs import DisplacementGate, RotationGate, AlwaysOnGate
+from .gate_specs import PhaseSpaceRotationGate, SqueezingGate, DisplacementGate, RotationGate, AlwaysOnGate

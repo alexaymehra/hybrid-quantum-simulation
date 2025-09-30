@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 from .info_extract import extract_qumode_info, fock_basis_to_position
 
 
-def generate_wavefunc(init_qubit_state, init_qumode_state, target_time, n_steps, gen_hamiltonian, backend, morse_to_optimize, mp):
+def generate_wavefunc(init_state, target_time, n_steps, gen_hamiltonian, backend, morse_to_optimize, mp):
 
     # Extract the Hamiltonian from the Time Evolution
     tgt_hamiltonian = (1j / backend.time) * sp.linalg.logm(morse_to_optimize)
@@ -21,9 +21,6 @@ def generate_wavefunc(init_qubit_state, init_qumode_state, target_time, n_steps,
     # Parameters
     x_var = np.linspace(-2, 8, 200)
     topos = fock_basis_to_position(x_var, backend.dim, mp)
-
-    # Create the Initial State in the Full Qubit-Qumode Hilbert Space
-    init_state = np.kron(init_qubit_state, init_qumode_state)
 
     # --- Time Steps ---
     times = np.linspace(0, target_time, n_steps)
@@ -49,6 +46,11 @@ def generate_wavefunc(init_qubit_state, init_qumode_state, target_time, n_steps,
         psi_tgt_t = U_tgt_t @ init_state
         psi_tgt = extract_qumode_info(psi_tgt_t, 0, backend.dim)
         psi_tgt_x = topos @ psi_tgt
+
+        # Normalize on the grid
+        dx = x_var[1] - x_var[0]
+        psi_gen_x /= np.sqrt(np.sum(np.abs(psi_gen_x)**2) * dx)
+        psi_tgt_x /= np.sqrt(np.sum(np.abs(psi_tgt_x)**2) * dx)
 
         # Plot
         ax.plot(x_var, np.abs(psi_gen_x)**2, label='Synthesized', color='red')

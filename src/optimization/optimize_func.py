@@ -13,7 +13,7 @@ import scipy.optimize as sp_opt
 
 # Main Optimization Function -------------------------------------------------------------
 # ----------------------------------------------------------------------------------------
-def run_optimization(seq_template, backend, d, loss_function, target_evolution, mode='simple', max_iterations=5):
+def run_optimization(seq_template, backend, d, loss_function, target_evolution, init_state, qubit_state_index, mp,  mode='simple', max_iterations=5, info_type='normal'):
     # total number of parameters across d layers
     n_params_per_layer = sum(g.n_params for g in seq_template)
     total_params = n_params_per_layer * d
@@ -21,20 +21,20 @@ def run_optimization(seq_template, backend, d, loss_function, target_evolution, 
     init_guess = np.random.rand(total_params) * 0.1   # small random initial guess
     
     if mode == 'coordinate-descent':
-        return coordinate_descent_optimization(seq_template, backend, d, init_guess, loss_function, target_evolution, max_iterations)
+        return coordinate_descent_optimization(seq_template, backend, d, init_guess, loss_function, target_evolution, max_iterations, info_type, init_state, qubit_state_index, mp)
     else:
-        return simple_optimization(seq_template, backend, d, init_guess, loss_function, target_evolution)
+        return simple_optimization(seq_template, backend, d, init_guess, loss_function, target_evolution, info_type, init_state, qubit_state_index, mp)
 # ----------------------------------------------------------------------------------------
 # ----------------------------------------------------------------------------------------
 
 
 # Simple Optimization Function -----------------------------------------------------------
 # ----------------------------------------------------------------------------------------
-def simple_optimization(seq_template, backend, d, init_guess, loss_function, target_evolution):
+def simple_optimization(seq_template, backend, d, init_guess, loss_function, target_evolution, info_type, init_state, qubit_state_index, mp):
     result = sp_opt.minimize(
         loss_function,          
         init_guess,
-        args=(seq_template, backend, d, target_evolution),   # pass seq_template in
+        args=(seq_template, backend, d, target_evolution, info_type, init_state, qubit_state_index, mp),   # pass seq_template in
         method='BFGS',
         options={'disp': True}
     )
@@ -45,7 +45,7 @@ def simple_optimization(seq_template, backend, d, init_guess, loss_function, tar
 
 # Optimization that works on one gate type at a time -------------------------------------
 # ----------------------------------------------------------------------------------------
-def coordinate_descent_optimization(seq_template, backend, d, init_guess, loss_function, target_evolution, max_iter):
+def coordinate_descent_optimization(seq_template, backend, d, init_guess, loss_function, target_evolution, max_iter, info_type, init_state, qubit_state_index, mp):
     """
     Coordinate descent optimization, grouped by gate type across layers.
     All gates of the same type (e.g. all Displacements) are optimized together.
@@ -77,7 +77,7 @@ def coordinate_descent_optimization(seq_template, backend, d, init_guess, loss_f
             def f_block(block_vars):
                 temp = curr_params.copy()
                 temp[indices] = block_vars
-                return loss_function(temp, seq_template, backend, d, target_evolution)
+                return loss_function(temp, seq_template, backend, d, target_evolution, info_type, init_state, qubit_state_index, mp)
 
             # current values for this blocks
             x0_block = curr_params[indices]
@@ -93,7 +93,7 @@ def coordinate_descent_optimization(seq_template, backend, d, init_guess, loss_f
             curr_params[indices] = res.x
             
             # print optimization information
-            curr_infid = loss_function(curr_params, seq_template, backend, d, target_evolution)
+            curr_infid = loss_function(curr_params, seq_template, backend, d, target_evolution, info_type, init_state, qubit_state_index, mp)
             print(f"Optimized {gname}, Iteration {it + 1}")
             print(f"Current Infidelity: {curr_infid:.6f}\n")
 

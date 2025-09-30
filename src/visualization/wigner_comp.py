@@ -13,7 +13,7 @@ from qutip import Qobj, wigner
 
 from .info_extract import extract_qumode_info
 
-def gen_wigfunc(wig_init_qubit_state, wig_init_qumode_state, time_and_extra, steps, generated_hamiltonian, backend, morse_to_optimize):
+def gen_wigfunc(init_state, time_and_extra, steps, generated_hamiltonian, backend, morse_to_optimize):
         
 
     # Extract the Hamiltonian from the Time Evolution
@@ -25,10 +25,6 @@ def gen_wigfunc(wig_init_qubit_state, wig_init_qumode_state, time_and_extra, ste
     # Define phase space grid
     xvec = np.linspace(-5, 5, 200)
 
-
-    # Create the Initial State in the Full Qubit-Qumode Hilbert Space
-    init_matrix = np.kron(wig_init_qubit_state, wig_init_qumode_state)
-
     fig, axes = plt.subplots(2, steps+1, figsize=(3 * (steps+1), 6), constrained_layout=True)
     fig.suptitle('Wigner Function Evolution: Top = Target, Bottom = Generated', fontsize=14)
 
@@ -37,8 +33,8 @@ def gen_wigfunc(wig_init_qubit_state, wig_init_qumode_state, time_and_extra, ste
         U_gen_t_wig = sp.linalg.expm(-1j * generated_hamiltonian * t)
         U_tgt_t_wig = sp.linalg.expm(-1j * target_hamiltonian * t)
 
-        step_state_generated = U_gen_t_wig @ init_matrix
-        step_state_target = U_tgt_t_wig @ init_matrix
+        step_state_generated = U_gen_t_wig @ init_state
+        step_state_target = U_tgt_t_wig @ init_state
 
         # Calculate Fidelity at Each Step
         fidelity = np.abs(np.vdot(step_state_generated, step_state_target))**2

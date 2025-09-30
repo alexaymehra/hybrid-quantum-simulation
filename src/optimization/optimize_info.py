@@ -9,6 +9,7 @@ Description:
 # Imports
 import numpy as np
 
+from visualization.info_extract import extract_qumode_info, fock_basis_to_position
 
 # Building a generic gate sequence -------------------------------------------------------
 # ----------------------------------------------------------------------------------------
@@ -39,10 +40,36 @@ def build_sequence(params, seq_template, backend, d=1):
 
 # Cost (Infidelity) Function -------------------------------------------------------------
 # ----------------------------------------------------------------------------------------
-def fidelity_loss(params, seq_template, backend, d, U_target):
+def fidelity_loss(params, seq_template, backend, d, U_target, info_type, init_state, qubit_state_index, mp):
+    # build the sequence based on gate parameters
     U = build_sequence(params, seq_template, backend, d)
-    dim = U.shape[0]
-    fid = np.abs(np.trace(U.conj().T @ U_target))/ (dim)
+    
+    # evolve the initial state
+    synth_state = U @ init_state
+    true_state = U_target @ init_state
+
+    # extract qumode information from evolved state & normalize
+    synth_qumode = extract_qumode_info(synth_state, qubit_state_index, backend.dim)
+    true_qumode = extract_qumode_info(true_state, qubit_state_index, backend.dim)
+    synth_qumode /= np.linalg.norm(synth_qumode)
+    true_qumode /= np.linalg.norm (true_qumode)
+
+    # optionally only look at position information
+    if (info_type == 'position'):
+        nx = 400
+        xmax = 10
+        xvec = np.linspace(-1 * xmax, xmax, nx)
+        pos_proj = fock_basis_to_position(xvec, backend.dim, mp)
+        synth_qumode = pos_proj @ synth_qumode
+        true_qumode = pos_proj @ true_qumode
+        
+        dx = xvec[1] - xvec[0]
+        
+        synth_qumode /= np.sqrt(np.sum(np.abs(synth_qumode)**2) * dx)
+        true_qumode /= np.sqrt(np.sum(np.abs(true_qumode)**2) * dx)
+
+    fid = np.abs(np.vdot(synth_qumode, true_qumode))  # vdot handles conjugation automatically
+
     return 1 - fid
-# ----------------------------------------------------------------------------------------
+# --------------------------------------s--------------------------------------------------
 # ----------------------------------------------------------------------------------------

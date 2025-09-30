@@ -17,8 +17,8 @@ class Gates:
     
     I_q = np.eye(2)                                         # Identity operator for qubits
 
-    proj0 = np.array([1, 0], [0, 0])                        # Projector to qubit 0 state
-    proj1 = np.array([0, 0],[0, 1])                         # Projector to qubit 1 state
+    proj0 = np.array([[1, 0], [0, 0]])                        # Projector to qubit 0 state
+    proj1 = np.array([[0, 0],[0, 1]])                         # Projector to qubit 1 state
 
     sigma_x = np.array([[0, 1], [1, 0]])                    # Pauli X Gate
     sigma_y = np.array([[0, -1j], [1j, 0]])                 # Pauli Y Gate

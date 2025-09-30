@@ -42,11 +42,11 @@ class Gates:
         evolution = sp.linalg.expm(-1j * hamiltonian * t)
         return evolution
     
-    def phase_space_rotation(self):
-        pass
+    def phase_space_rotation(self, theta):
+        return sp.linalg.expm(1j * theta * self.n_op)
 
-    def full_phase_space_rotation(self):
-        pass
+    def full_phase_space_rotation(self, theta):
+        return np.kron(self.I_q, self.phase_space_rotation(theta))
 
     def displacement(self, alpha):
         exponent = alpha * self.adag - np.conj(alpha) * self.a
@@ -57,11 +57,12 @@ class Gates:
         full_gate = np.kron(self.I_q, self.displacement(alpha))
         return full_gate
     
-    def squeezing(self):
-        pass
+    def squeezing(self, theta):
+        a_part = 0.5 * (self.a @ self.a - self.adag @ self.adag)
+        return sp.linalg.expm(theta * a_part)
 
-    def full_squeezing(self):
-        pass
+    def full_squeezing(self, theta):
+        return np.kron(self.I_q, self.full_squeezing(theta))
 
     def beamsplitter(self):
         pass

@@ -29,12 +29,23 @@ class GateSpec:
 
 # Specific gates that can be built -------------------------------------------------------
 # ----------------------------------------------------------------------------------------
+PhaseSpaceRotationGate = GateSpec(
+    "Phase Space Rotation",
+    1,
+    lambda params, backend, config: backend.full_phase_space_rotation(params[0])
+)
+
 DisplacementGate = GateSpec(
     "Displacement",
     2,
     lambda params, backend, config: backend.full_displacement(params[0] + 1j*params[1])
 )
 
+SqueezingGate = GateSpec(
+    "Squeezing",
+    1,
+    lambda params, backend, config: backend.full_squeezing(params[0])
+)
 
 RotationGate = GateSpec(
     "XY Rotation",

@@ -64,12 +64,14 @@ def fidelity_loss(params, seq_template, backend, d, U_target, info_type, init_st
         true_qumode = pos_proj @ true_qumode
         
         dx = xvec[1] - xvec[0]
-        
+
         synth_qumode /= np.sqrt(np.sum(np.abs(synth_qumode)**2) * dx)
         true_qumode /= np.sqrt(np.sum(np.abs(true_qumode)**2) * dx)
 
-    fid = np.abs(np.vdot(synth_qumode, true_qumode))  # vdot handles conjugation automatically
+        fid = np.abs(np.vdot(synth_qumode, true_qumode) * dx)
+    else:
+        fid = np.abs(np.vdot(synth_qumode, true_qumode))  # vdot handles conjugation automatically
 
     return 1 - fid
-# --------------------------------------s--------------------------------------------------
+# ----------------------------------------------------------------------------------------
 # ----------------------------------------------------------------------------------------

@@ -94,7 +94,7 @@ class Gates:
         phys_p = np.sqrt(mp.hbar * mp.mass * mp.angular_freq) * self.p_op
         
         kinetic_part = (phys_p @ phys_p) * (1 / (2 * mp.mass))
-        exponent_term = -1 * mp.b * (phys_x - mp.x0 * self.I_o)
+        exponent_term = -1j * mp.b * (phys_x - mp.x0 * self.I_o)
         position_part = mp.de * ((1 - sp.linalg.expm(exponent_term)) ** 2)
         hamiltonian = kinetic_part + position_part
 
@@ -103,6 +103,24 @@ class Gates:
         full_hamiltonian = np.kron(self.I_q, hamiltonian)
 
         return full_hamiltonian, full_pos_part, full_kin_part
+    
+    ### Testing ############################################ 
+    def partial_morse(self, mp):
+        #phys_x = np.sqrt(mp.hbar / (mp.mass * mp.angular_freq)) * self.x_op
+        #phys_p = np.sqrt(mp.hbar * mp.mass * mp.angular_freq) * self.p_op
+        
+        #kinetic_part = (phys_p @ phys_p) * (1 / (2 * mp.mass))
+        #exponent_term = -1 * mp.b * (phys_x - mp.x0 * self.I_o)
+
+        kinetic_part = (self.p_op @ self.p_op) 
+        exponent_term = -1 * mp.b * (self.x_op - mp.x0 * self.I_o)
+
+        position_part = mp.de * ((self.I_o - sp.linalg.expm(exponent_term)) @ (self.I_o - sp.linalg.expm(exponent_term)))
+        
+        hamiltonian = kinetic_part + position_part
+
+        return hamiltonian
+    ########################################################
     
     def morse_time_evolution(self, mp):
         ham, pos, kin = self.morse_hamiltonian(mp)

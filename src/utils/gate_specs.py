@@ -2,7 +2,7 @@
 Filename: gate_specs.py
 Author: Alexay Mehra
 Date: 2025-09-28
-Description: 
+Description: Holds the Class for building gates, and specific gates for optimizaiton.
 """
 
 

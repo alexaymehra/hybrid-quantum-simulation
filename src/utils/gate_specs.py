@@ -29,51 +29,45 @@ class GateSpec:
 
 # Specific gates that can be built -------------------------------------------------------
 # ----------------------------------------------------------------------------------------
-PhaseSpaceRotationGate = GateSpec(
-    "Phase Space Rotation",
-    1,
-    lambda params, backend, config: backend.full_phase_space_rotation(params[0])
-)
-
-DisplacementGate = GateSpec(
-    "Displacement",
-    2,
-    lambda params, backend, config: backend.full_displacement(params[0] + 1j*params[1])
-)
-
-SqueezingGate = GateSpec(
-    "Squeezing",
-    1,
-    lambda params, backend, config: backend.full_squeezing(params[0])
-)
-
-RotationGate = GateSpec(
-    "Qubit XY Rotation",
-    2,
-    lambda params, backend, config: backend.full_qubit_xy_rotation(params[0], params[1])
-)
-
-ControlledDisplacement = GateSpec(
-    "Controlled Displacement",
-    1,
-    lambda params, backend, config: backend.controlled_displacement(params[0])
-)
-
-ControlledCVRotation = GateSpec(
-    "Controlled CV Rotation",
-    1,
-    lambda params, backend, config: backend.controlled_cv_rotation(params[0])
-)
-
-AlwaysOnGate = GateSpec(
-    "Always-On Evolution",
+ControlledRotation = GateSpec(
+    "Controlled Rotation",
     n_params = 0,                                       # optimization doesn't touch any parameters
-    builder = lambda params, backend, config: backend.always_on_evolution(
+    builder = lambda params, backend, config: backend.c_r(
         omega = config.get("omega", 1),
         chi = config.get("chi", 0.01),
         t = config.get("time", 1)
     ),
     config = {"omega": 1, "chi": 0.01, "time": 1}       # allows for notebook-configurable parameters
+)
+
+QumodeRotation = GateSpec(
+    "Phase Space Rotation",
+    1,
+    lambda params, backend, config: backend.cv_r_full(params[0])
+)
+
+Displacement = GateSpec(
+    "Displacement",
+    2,
+    lambda params, backend, config: backend.cv_d_full(params[0] + 1j*params[1])
+)
+
+Squeezing = GateSpec(
+    "Squeezing",
+    1,
+    lambda params, backend, config: backend.cv_s_full(params[0])
+)
+
+QubitRotation = GateSpec(
+    "Qubit XY Rotation",
+    2,
+    lambda params, backend, config: backend.q_xy_r_full(params[0], params[1])
+)
+
+ControlledDisplacement = GateSpec(
+    "Controlled Displacement",
+    1,
+    lambda params, backend, config: backend.c_d(params[0])
 )
 # ----------------------------------------------------------------------------------------
 # ----------------------------------------------------------------------------------------

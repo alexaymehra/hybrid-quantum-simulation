@@ -1,8 +1,6 @@
 # Simulating Complex Molecular Interactions Using Quantum Harmonic Oscillators
-This repository contains optimization pipelines using NumPy and SciPy to calibrate hybrid quantum circuit models for accurate simulation of complex molecular dynamics.
+## 📄 Project Paper
 
-## Features
-- Optimizatoin scripts using NumPy and SciPy
-- Quantum simulation utilities with QuTip
-- Data visualizations with Matplotlib
-- Adjustable parameters for the quanum circuit
+[![Project Paper Cover](docs/cover.png)](docs/paper.pdf)
+
+_Click the image to open the full PDF._

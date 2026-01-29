@@ -1,5 +1,5 @@
 # Simulating Complex Molecular Interactions Using Quantum Harmonic Oscillators
-## 📄 Project Paper
+## 📄 Project Poster
 
 [![Project Paper Cover](docs/FinalPoster.jpg)](docs/FinalPoster.pdf)
 
